@@ -50,12 +50,8 @@ jobs:
             pip install -r requirements.txt
             
             # Create/update .env file
-            cat > .env << 'EOF'
-            SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-            SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
-            API_HOST=0.0.0.0
-            API_PORT=8000
-            EOF
+            printf "SUPABASE_URL=%s\nSUPABASE_KEY=%s\nAPI_HOST=0.0.0.0\nAPI_PORT=8000\n" \
+              "${{ secrets.SUPABASE_URL }}" "${{ secrets.SUPABASE_KEY }}" > .env
             
             # Restart the service
             sudo systemctl start payment-backend

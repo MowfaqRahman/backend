@@ -1,0 +1,62 @@
+name: Deploy Backend to AWS EC2
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests (if any)
+        run: |
+          # Add your test commands here
+          echo "No tests configured yet"
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT || 22 }}
+          script: |
+            # Navigate to backend directory
+            cd ~/payment-app-backend || exit 1
+            
+            # Pull latest changes
+            git pull origin main
+            
+            # Stop existing service
+            sudo systemctl stop payment-backend || true
+            
+            # Install/update dependencies
+            source venv/bin/activate
+            pip install -r requirements.txt
+            
+            # Restart the service
+            sudo systemctl start payment-backend
+            sudo systemctl enable payment-backend
+            
+            # Check service status
+            sudo systemctl status payment-backend
+
+      - name: Health Check
+        run: |
+          sleep 10
+          curl -f http://${{ secrets.EC2_HOST }}:8000/health || exit 1

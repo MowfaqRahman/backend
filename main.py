@@ -21,7 +21,7 @@ models.Base.metadata.create_all(bind=database.engine)
 
 @app.get("/")
 def root():
-    return {"message": "Payment Collection API", "status": "running", "version": "1.1.0-deploy-test"}
+    return {"message": "Payment Collection API", "status": "running", "version": "1.2.0-cicd-test"}
 
 @app.get("/health")
 def health_check():

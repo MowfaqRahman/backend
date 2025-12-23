@@ -1,29 +1,18 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
+from supabase import create_client, Client
 
 load_dotenv()
 
-# Using SQLite for local development by default, can be overridden by DATABASE_URL
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./sql_app.db")
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
-if SQLALCHEMY_DATABASE_URL.startswith("postgresql"):
-    engine = create_engine(SQLALCHEMY_DATABASE_URL)
-else:
-    engine = create_engine(
-        SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-    )
+if not SUPABASE_URL or not SUPABASE_KEY:
+    # Fallback to provided credentials if not in env
+    SUPABASE_URL = "https://zplspvcuzjxavdmbpcsa.supabase.co"
+    SUPABASE_KEY = "sb_publishable_wxd83d7VhWOcFv9kQHFSvQ_qEHTymYt"
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-Base = declarative_base()
-
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+def get_supabase():
+    return supabase

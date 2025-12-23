@@ -17,7 +17,7 @@ class Payment(BaseModel):
     status: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class CustomerBase(BaseModel):
     account_number: str
@@ -30,7 +30,7 @@ class Customer(CustomerBase):
     id: int
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class CustomerWithHistory(Customer):
     payments: List[Payment] = []
